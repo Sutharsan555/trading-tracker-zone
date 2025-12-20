@@ -8,9 +8,10 @@
     --success: #10b981;
     --danger: #ef4444;
     --border: rgba(255, 255, 255, 0.1);
-    --glass-bg: rgba(255, 255, 255, 0.03);
+    --glass-bg: rgba(255, 255, 255, 0.05);
     --glass-border: rgba(255, 255, 255, 0.1);
     --mobile-nav-height: 60px;
+    --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
 
 * {
@@ -242,10 +243,17 @@ h3,
 /* Glass Cards */
 .glass {
     background: var(--card-bg);
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--glass-border);
     border-radius: 1.25rem;
     padding: 1.5rem;
+    box-shadow: var(--shadow);
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.glass:hover {
+    border-color: rgba(99, 102, 241, 0.3);
 }
 
 .stats-grid {
@@ -343,6 +351,10 @@ td {
     font-weight: 600;
     transition: all 0.3s ease;
     font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: center;
 }
 
 .btn-primary {
@@ -379,6 +391,13 @@ td {
 
 .btn-icon:hover {
     background: var(--glass-bg);
+    color: var(--primary);
+    transform: scale(1.1);
+}
+
+.action-group {
+    display: flex;
+    gap: 0.5rem;
 }
 
 .badge-side {
@@ -728,5 +747,119 @@ td {
     .calendar-grid {
         gap: 0.5rem;
         padding: 1rem;
+    }
+}
+
+/* Mobile App Section */
+.mobile-app-container {
+    padding: 3rem;
+}
+
+.mobile-promo {
+    display: flex;
+    align-items: center;
+    gap: 4rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.promo-text h3 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #fff 0%, var(--primary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.promo-text p {
+    font-size: 1.125rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+.btn-large {
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+}
+
+.promo-visual {
+    flex-shrink: 0;
+}
+
+.qr-placeholder {
+    background: white;
+    padding: 2rem;
+    border-radius: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    color: #0f172a;
+    box-shadow: 0 0 40px rgba(99, 102, 241, 0.4);
+}
+
+.qr-placeholder span {
+    font-weight: 700;
+    font-size: 0.875rem;
+}
+
+/* Dashboard PF refinements */
+.dashboard-pf-card {
+    transition: transform 0.3s ease;
+}
+
+.dashboard-pf-card:hover {
+    transform: scale(1.05);
+}
+
+.dashboard-pf-card .stat-value {
+    font-variant-numeric: tabular-nums;
+}
+
+/* QR Card Styling */
+.qr-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 200px;
+}
+
+.qr-container {
+    background: white;
+    padding: 10px;
+    border-radius: 0.75rem;
+    margin: 1rem 0;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qr-container canvas,
+.qr-container img {
+    border-radius: 4px;
+}
+
+.qr-hint {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+@media (max-width: 768px) {
+    .mobile-promo {
+        flex-direction: column;
+        gap: 2rem;
+        text-align: center;
+    }
+
+    .promo-text h3 {
+        font-size: 1.75rem;
+    }
+
+    .promo-visual {
+        order: -1;
     }
 }

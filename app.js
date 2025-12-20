@@ -10,6 +10,8 @@ class AlphaTrack {
         this.equityChart = null;
         this.currentDate = new Date();
         this.activeTab = 'dashboard';
+        this.editingTradeIndex = null;
+        this.qrCode = null;
 
         this.init();
     }
@@ -109,7 +111,7 @@ class AlphaTrack {
 
         this.activeTab = tabId;
         const title = tabId.charAt(0).toUpperCase() + tabId.slice(1);
-        document.getElementById('active-tab-title').innerText = title === 'Forex' ? 'Forex Trades' : (title === 'Stocks' ? 'Stock Trades' : title);
+        document.getElementById('active-tab-title').innerText = title === 'Forex' ? 'Forex Trades' : (title === 'Stocks' ? 'Stock Trades' : (title === 'Mobile' ? 'Mobile App' : title));
 
         if (tabId === 'calendar') this.renderCalendar();
         this.renderAll();
@@ -171,10 +173,16 @@ class AlphaTrack {
         if (document.getElementById('win-rate')) document.getElementById('win-rate').innerText = `${winRate}%`;
         if (document.getElementById('total-trades')) document.getElementById('total-trades').innerText = this.trades.length;
 
-        // Update Sheet Stats
+        // Update Sheet & Dashboard Stats
         if (document.getElementById('avg-winner')) document.getElementById('avg-winner').innerText = `$${avgWin.toFixed(2)}`;
         if (document.getElementById('avg-loser')) document.getElementById('avg-loser').innerText = `-$${avgLoss.toFixed(2)}`;
         if (document.getElementById('profit-factor')) document.getElementById('profit-factor').innerText = profitFactor;
+
+        if (document.getElementById('dash-avg-winner')) document.getElementById('dash-avg-winner').innerText = `$${avgWin.toFixed(2)}`;
+        if (document.getElementById('dash-avg-loser')) document.getElementById('dash-avg-loser').innerText = `-$${avgLoss.toFixed(2)}`;
+        if (document.getElementById('dash-profit-factor')) document.getElementById('dash-profit-factor').innerText = profitFactor;
+
+        this.updateProfitQR(totalNetPL, winRate, this.trades.length);
 
         const completedTasks = this.tasks.filter(t => t.completed).length;
         if (document.getElementById('task-progress')) document.getElementById('task-progress').innerText = `${completedTasks}/${this.tasks.length}`;
@@ -204,6 +212,8 @@ class AlphaTrack {
         const forexTable = document.querySelector('#forex-table tbody');
         const stocksTable = document.querySelector('#stocks-table tbody');
 
+        if (!forexTable || !stocksTable) return;
+
         forexTable.innerHTML = '';
         stocksTable.innerHTML = '';
 
@@ -219,7 +229,10 @@ class AlphaTrack {
                 <td><small>${trade.reason || '-'}</small></td>
                 <td class="${trade.pl >= 0 ? 'pl-positive' : 'pl-negative'}">$${trade.pl}</td>
                 <td>
-                    <button class="btn-icon" onclick="app.deleteTrade(${index})"><i data-lucide="trash-2"></i></button>
+                    <div class="action-group">
+                        <button class="btn-icon" onclick="app.editTrade(${index})"><i data-lucide="edit-3"></i></button>
+                        <button class="btn-icon" onclick="app.deleteTrade(${index})"><i data-lucide="trash-2"></i></button>
+                    </div>
                 </td>
             `;
 
@@ -321,6 +334,26 @@ class AlphaTrack {
     closeModal() {
         document.getElementById('trade-modal').classList.remove('active');
         document.getElementById('trade-form').reset();
+        this.editingTradeIndex = null;
+        document.querySelector('#trade-modal h2').innerText = 'Add New Trade';
+    }
+
+    editTrade(index) {
+        const trade = this.trades[index];
+        this.editingTradeIndex = index;
+
+        document.querySelector('#trade-modal h2').innerText = 'Edit Trade';
+        document.getElementById('trade-type').value = trade.type;
+        document.getElementById('trade-asset').value = trade.asset;
+        document.getElementById('trade-side').value = trade.side || 'Long';
+        document.getElementById('trade-entry').value = trade.entry;
+        document.getElementById('trade-exit').value = trade.exit;
+        document.getElementById('trade-pl').value = trade.pl;
+        document.getElementById('trade-commission').value = trade.commission || 0;
+        document.getElementById('trade-date').value = trade.date;
+        document.getElementById('trade-reason').value = trade.reason || '';
+
+        document.getElementById('trade-modal').classList.add('active');
     }
 
     handleTradeSubmit() {
@@ -336,7 +369,12 @@ class AlphaTrack {
             date: document.getElementById('trade-date').value,
         };
 
-        this.trades.push(trade);
+        if (this.editingTradeIndex !== null) {
+            this.trades[this.editingTradeIndex] = trade;
+        } else {
+            this.trades.push(trade);
+        }
+
         localStorage.setItem('alpha_trades', JSON.stringify(this.trades));
         this.closeModal();
         this.renderAll();
@@ -682,6 +720,23 @@ class AlphaTrack {
             list.appendChild(article);
         });
         lucide.createIcons();
+    }
+
+    updateProfitQR(pl, winRate, tradeCount) {
+        const qrContainer = document.getElementById('profit-qr');
+        if (!qrContainer) return;
+
+        const summary = `AlphaTrack Stats\nTotal P/L: $${pl.toFixed(2)}\nWin Rate: ${winRate}%\nTrades: ${tradeCount}`;
+
+        qrContainer.innerHTML = '';
+        this.qrCode = new QRCode(qrContainer, {
+            text: summary,
+            width: 100,
+            height: 100,
+            colorDark: "#6366f1",
+            colorLight: "rgba(255, 255, 255, 0.05)",
+            correctLevel: QRCode.CorrectLevel.H
+        });
     }
 }
 

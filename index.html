@@ -15,6 +15,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 
 <body class="dark-theme">
@@ -48,6 +49,9 @@
                 </button>
                 <button class="nav-item" data-tab="reviews">
                     <i data-lucide="file-text"></i> <span>Reviews</span>
+                </button>
+                <button class="nav-item" data-tab="mobile">
+                    <i data-lucide="smartphone"></i> <span>Mobile App</span>
                 </button>
             </nav>
         </aside>
@@ -98,6 +102,23 @@
                     <div class="stat-card glass">
                         <h3>Daily Tasks</h3>
                         <p class="stat-value" id="task-progress">0/0</p>
+                    </div>
+                    <div class="stat-card glass dashboard-pf-card">
+                        <h3>Avg Winner</h3>
+                        <p class="stat-value pl-positive" id="dash-avg-winner">$0.00</p>
+                    </div>
+                    <div class="stat-card glass dashboard-pf-card">
+                        <h3>Avg Loser</h3>
+                        <p class="stat-value pl-negative" id="dash-avg-loser">$0.00</p>
+                    </div>
+                    <div class="stat-card glass dashboard-pf-card">
+                        <h3>Profit Factor</h3>
+                        <p class="stat-value" id="dash-profit-factor">0.00</p>
+                    </div>
+                    <div class="stat-card glass qr-card">
+                        <h3>Profit Review QR</h3>
+                        <div id="profit-qr" class="qr-container"></div>
+                        <p class="qr-hint"><small>Scan to see summary</small></p>
                     </div>
                 </div>
 
@@ -285,6 +306,35 @@
                             PDF</button>
                     </div>
                 </div>
+            </section>
+
+            <section id="mobile" class="tab-content">
+                <div class="section-header">
+                    <h2>AlphaTrack Mobile</h2>
+                </div>
+                <div class="mobile-app-container glass mt-4">
+                    <div class="mobile-promo">
+                        <div class="promo-text">
+                            <h3>Trade Anywhere, Anytime.</h3>
+                            <p>Get the full AlphaTrack experience on your Android device. Track trades, log journal
+                                entries, and check your P/L on the go.</p>
+                            <div class="download-actions mt-4">
+                                <a href="index.html" download="AlphaTrack.html" class="btn btn-primary btn-large">
+                                    <i data-lucide="download"></i> Download Web-View
+                                </a>
+                                <p class="muted-text mt-2"><small>Version 1.0.0 | Stable Build</small></p>
+                            </div>
+                        </div>
+                        <div class="promo-visual">
+                            <div class="qr-placeholder">
+                                <i data-lucide="qr-code" size="100"></i>
+                                <span>Scan to Download</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             </section>
         </main>
     </div>
