@@ -55,19 +55,17 @@ h3,
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 3rem;
-    color: var(--primary);
+.brand-logo {
+    width: 100%;
+    max-height: 80px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.3));
 }
 
-.logo-icon {
-    width: 32px;
-    height: 32px;
+.logo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
 }
 
 .nav-menu {
