@@ -13,7 +13,78 @@ class AlphaTrack {
         this.editingTradeIndex = null;
         this.qrCode = null;
 
+        // Firebase Cloud Sync
+        this.db = (typeof firebase !== 'undefined') ? firebase.firestore() : null;
+        this.uid = localStorage.getItem('alpha_uid');
+
         this.init();
+        this.setupAuth();
+        this.loadCloudData();
+    }
+
+    async loadCloudData() {
+        if (!this.db || !this.uid) return;
+
+        console.log('Syncing with cloud...');
+        try {
+            const doc = await this.db.collection('user_data').doc(this.uid).get();
+            if (doc.exists) {
+                const data = doc.data();
+                this.trades = data.trades || this.trades;
+                this.journal = data.journal || this.journal;
+                this.tasks = data.tasks || this.tasks;
+                this.saveLocal();
+                this.renderAll();
+            }
+        } catch (err) {
+            console.error('Cloud load failed:', err);
+        }
+    }
+
+    async syncToCloud() {
+        if (!this.db || !this.uid) return;
+
+        try {
+            await this.db.collection('user_data').doc(this.uid).set({
+                trades: this.trades,
+                journal: this.journal,
+                tasks: this.tasks,
+                lastSync: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+            console.log('Cloud sync successful');
+        } catch (err) {
+            console.error('Cloud sync failed:', err);
+        }
+    }
+
+    saveLocal() {
+        localStorage.setItem('alpha_trades', JSON.stringify(this.trades));
+        localStorage.setItem('alpha_journal', JSON.stringify(this.journal));
+        localStorage.setItem('alpha_tasks', JSON.stringify(this.tasks));
+    }
+
+    setupAuth() {
+        // Display user email
+        const email = localStorage.getItem('alpha_user');
+        const userDisplay = document.getElementById('user-email');
+        if (userDisplay && email) {
+            userDisplay.innerText = email;
+        }
+
+        // Logout logic
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', async () => {
+                if (typeof firebase !== 'undefined') {
+                    await firebase.auth().signOut();
+                }
+                localStorage.removeItem('alpha_auth');
+                localStorage.removeItem('alpha_auth_token');
+                localStorage.removeItem('alpha_user');
+                localStorage.removeItem('alpha_uid');
+                window.location.href = 'auth.html';
+            });
+        }
     }
 
     init() {
@@ -322,7 +393,8 @@ class AlphaTrack {
     }
 
     saveTasks() {
-        localStorage.setItem('alpha_tasks', JSON.stringify(this.tasks));
+        this.saveLocal();
+        this.syncToCloud();
     }
 
     showAddTradeModal(type = 'forex') {
@@ -375,7 +447,8 @@ class AlphaTrack {
             this.trades.push(trade);
         }
 
-        localStorage.setItem('alpha_trades', JSON.stringify(this.trades));
+        this.saveLocal();
+        this.syncToCloud();
         this.closeModal();
         this.renderAll();
     }
@@ -383,7 +456,8 @@ class AlphaTrack {
     deleteTrade(index) {
         if (confirm('Delete this trade?')) {
             this.trades.splice(index, 1);
-            localStorage.setItem('alpha_trades', JSON.stringify(this.trades));
+            this.saveLocal();
+            this.syncToCloud();
             this.renderAll();
         }
     }
@@ -678,7 +752,8 @@ class AlphaTrack {
             this.journal.unshift(entry);
         }
 
-        localStorage.setItem('alpha_journal', JSON.stringify(this.journal));
+        this.saveLocal();
+        this.syncToCloud();
         this.closeJournalModal();
         this.renderJournal();
     }
@@ -686,7 +761,8 @@ class AlphaTrack {
     deleteJournal(id) {
         if (confirm('Delete this journal entry?')) {
             this.journal = this.journal.filter(e => e.id != id);
-            localStorage.setItem('alpha_journal', JSON.stringify(this.journal));
+            this.saveLocal();
+            this.syncToCloud();
             this.renderJournal();
         }
     }

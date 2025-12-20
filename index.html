@@ -16,6 +16,32 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-performance-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <script>
+        // Real-time Auth Persistence Check
+        const checkAuth = () => {
+            const isAuth = localStorage.getItem('alpha_auth') === 'true';
+            const hasToken = !!localStorage.getItem('alpha_auth_token');
+            if (!isAuth || !hasToken) {
+                window.location.href = 'auth.html';
+            }
+        };
+
+        // Initialize Firebase on index.html
+        if (typeof firebase !== 'undefined') {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        checkAuth();
+    </script>
 </head>
 
 <body class="dark-theme">
@@ -53,6 +79,20 @@
                     <i data-lucide="smartphone"></i> <span>Mobile App</span>
                 </button>
             </nav>
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        <i data-lucide="user"></i>
+                    </div>
+                    <div class="user-info">
+                        <span id="user-email">user@alphatrack.com</span>
+                        <small>Premium Plan</small>
+                    </div>
+                </div>
+                <button class="btn-logout" id="logout-btn">
+                    <i data-lucide="log-out"></i> <span>Logout</span>
+                </button>
+            </div>
         </aside>
 
         <main class="content">
