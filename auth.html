@@ -19,6 +19,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-performance-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
+
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 </head>
 
 <body class="dark-theme auth-page">
@@ -104,6 +107,29 @@
             </div>
         </div>
     </div>
+    <!-- Protocol Warning Modal -->
+    <div id="protocol-modal" class="modal">
+        <div class="modal-content glass">
+            <h2 class="pl-negative"><i data-lucide="alert-triangle"></i> Local File System detected</h2>
+            <p class="mt-4">Social Login (Google/Facebook) requires a web server to function and cannot run on
+                <code>file://</code>.
+            </p>
+            <div class="server-tips mt-4 glass">
+                <h4>Quick Solutions:</h4>
+                <ul>
+                    <li>Use <strong>VS Code Live Server</strong> extension</li>
+                    <li>Run <code>python -m http.server</code> in this folder</li>
+                    <li>Run <code>npx http-server</code> in this folder</li>
+                </ul>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary"
+                    onclick="document.getElementById('protocol-modal').classList.remove('active')">Cancel</button>
+                <button type="button" class="btn btn-primary" id="use-demo-btn">Try Demo Account</button>
+            </div>
+        </div>
+    </div>
+
     <script src="firebase-config.js"></script>
     <script src="auth.js"></script>
     <script>lucide.createIcons();</script>

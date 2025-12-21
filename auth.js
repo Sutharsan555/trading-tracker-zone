@@ -1,11 +1,100 @@
 /**
+ * EmailNotificationService - Handles sending emails via EmailJS
+ */
+class EmailNotificationService {
+    constructor() {
+        this.publicKey = "YOUR_EMAILJS_PUBLIC_KEY"; // Placeholder
+        this.serviceId = "YOUR_SERVICE_ID";
+        this.templateId = "YOUR_TEMPLATE_ID";
+
+        if (typeof emailjs !== 'undefined' && this.publicKey !== "YOUR_EMAILJS_PUBLIC_KEY") {
+            emailjs.init(this.publicKey);
+        }
+    }
+
+    async sendLoginNotification(email) {
+        console.log(`Attempting to send login notification to ${email}...`);
+
+        if (typeof emailjs === 'undefined' || this.publicKey === "YOUR_EMAILJS_PUBLIC_KEY") {
+            console.warn("EmailJS not configured. Notification skipped.");
+            // UI Feedback for demo
+            this.showFakeNotification(email);
+            return;
+        }
+
+        try {
+            await emailjs.send(this.serviceId, this.templateId, {
+                to_email: email,
+                login_time: new Date().toLocaleString(),
+                app_name: "AlphaTrack"
+            });
+            console.log("Email notification sent successfully!");
+        } catch (err) {
+            console.error("Failed to send email notification:", err);
+        }
+    }
+
+    showFakeNotification(email) {
+        // Just for demo purposes since we don't have real keys yet
+        const toast = document.createElement('div');
+        toast.className = 'glass-toast';
+        toast.innerHTML = `
+            <div class="toast-content">
+                <i data-lucide="mail"></i>
+                <span>Security Alert: Login notification sent to ${email} (Simulated)</span>
+            </div>
+        `;
+        document.body.appendChild(toast);
+        lucide.createIcons();
+        setTimeout(() => toast.remove(), 5000);
+    }
+}
+
+/**
+ * PushNotificationService - Handles browser push notifications
+ */
+class PushNotificationService {
+    constructor() {
+        this.hasPermission = false;
+        this.init();
+    }
+
+    async init() {
+        if (!("Notification" in window)) {
+            console.warn("This browser does not support desktop notifications");
+            return;
+        }
+
+        if (Notification.permission === "granted") {
+            this.hasPermission = true;
+        } else if (Notification.permission !== "denied") {
+            const permission = await Notification.requestPermission();
+            this.hasPermission = (permission === "granted");
+        }
+    }
+
+    send(title, body) {
+        if (this.hasPermission) {
+            new Notification(title, {
+                body: body,
+                icon: 'logo.png'
+            });
+        } else {
+            console.log("Push notification permission not granted.");
+        }
+    }
+}
+
+/**
  * MockAuthService - Now integrated with Firebase for real cloud connection
  */
 class MockAuthService {
     constructor() {
-        // Initialize Firebase
+        this.emailService = new EmailNotificationService();
+        this.pushService = new PushNotificationService();
+        // Initialize Firebase services
         if (typeof firebase !== 'undefined') {
-            firebase.initializeApp(firebaseConfig);
+            // Already initialized in firebase-config.js
             this.auth = firebase.auth();
             this.db = firebase.firestore();
         }
@@ -26,17 +115,29 @@ class MockAuthService {
     async register(name, email, password) {
         // Create user in Firebase Auth
         if (this.auth) {
-            const userCredential = await this.auth.createUserWithEmailAndPassword(email, password);
-            await userCredential.user.updateProfile({ displayName: name });
+            try {
+                const userCredential = await this.auth.createUserWithEmailAndPassword(email, password);
+                await userCredential.user.updateProfile({ displayName: name });
 
-            // Store additional data in Firestore
-            await this.db.collection('users').doc(userCredential.user.uid).set({
-                name,
-                email,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
+                // Store additional data in Firestore
+                await this.db.collection('users').doc(userCredential.user.uid).set({
+                    name,
+                    email,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
 
-            return this.login(email, password);
+                return this.login(email, password);
+            } catch (err) {
+                console.error('Registration error:', err);
+                if (err.code === 'auth/email-already-in-use') {
+                    throw new Error('This email is already registered. Please try logging in.');
+                } else if (err.code === 'auth/weak-password') {
+                    throw new Error('The password is too weak. Please use at least 6 characters.');
+                } else if (err.code === 'auth/invalid-email') {
+                    throw new Error('The email address is not valid.');
+                }
+                throw err;
+            }
         }
 
         // Local Fallback
@@ -56,6 +157,10 @@ class MockAuthService {
             localStorage.setItem('alpha_auth_token', token);
             localStorage.setItem('alpha_user', email);
             localStorage.setItem('alpha_uid', userCredential.user.uid);
+
+            // Send Notifications
+            await this.emailService.sendLoginNotification(email);
+            this.pushService.send("Login Successful", `Welcome back, ${email}!`);
 
             return { success: true };
         }
@@ -87,15 +192,27 @@ class MockAuthService {
             authProvider = new firebase.auth.FacebookAuthProvider();
         }
 
-        const result = await this.auth.signInWithPopup(authProvider);
-        const token = await result.user.getIdToken();
+        try {
+            const result = await this.auth.signInWithPopup(authProvider);
+            const token = await result.user.getIdToken();
 
-        localStorage.setItem('alpha_auth', 'true');
-        localStorage.setItem('alpha_auth_token', token);
-        localStorage.setItem('alpha_user', result.user.email);
-        localStorage.setItem('alpha_uid', result.user.uid);
+            localStorage.setItem('alpha_auth', 'true');
+            localStorage.setItem('alpha_auth_token', token);
+            localStorage.setItem('alpha_user', result.user.email);
+            localStorage.setItem('alpha_uid', result.user.uid);
 
-        return { success: true };
+            return { success: true };
+        } catch (err) {
+            console.error('Social login error:', err);
+            if (err.code === 'auth/operation-not-allowed') {
+                throw new Error(`Social login for ${provider} is not enabled in the Firebase Console.`);
+            } else if (err.code === 'auth/unauthorized-domain') {
+                throw new Error('This domain is not authorized for Firebase Authentication. Please add it to "Authorized domains" in the Firebase Console.');
+            } else if (err.code === 'auth/invalid-credential') {
+                throw new Error('Firebase rejected the credential. Ensure the Google/Facebook provider is correctly configured.');
+            }
+            throw err;
+        }
     }
 }
 
@@ -139,7 +256,16 @@ document.addEventListener('DOMContentLoaded', () => {
             await authService.login(email, password);
             window.location.href = 'index.html';
         } catch (err) {
-            alert(err.message);
+            console.error('Login error:', err);
+            if (err.code === 'auth/invalid-credential') {
+                authService.pushService.send("Login Failed", "Incorrect email or password.");
+                alert('Account not found or incorrect password. Switching to Sign Up if you need a new account.');
+                // Automatically switch to Sign Up tab
+                document.getElementById('signup-tab').click();
+            } else {
+                authService.pushService.send("Login Error", err.message);
+                alert(`Login failed: ${err.message}`);
+            }
         } finally {
             submitBtn.innerText = 'Login';
             submitBtn.disabled = false;
@@ -158,6 +284,8 @@ document.addEventListener('DOMContentLoaded', () => {
             submitBtn.innerText = 'Creating account...';
             submitBtn.disabled = true;
             await authService.register(name, email, password);
+            // Redirection is usually handled by authService.register -> login, 
+            // but we'll ensure it here for consistency.
             window.location.href = 'index.html';
         } catch (err) {
             alert(err.message);
@@ -171,7 +299,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const handleSocial = async (provider) => {
         // Check if running via file protocol
         if (window.location.protocol === 'file:') {
-            alert('Social Login (Google/Facebook) typically does not work when opening the HTML file directly (file://). Please use a local server or host your files on Firebase Hosting/GitHub Pages.');
+            const protocolModal = document.getElementById('protocol-modal');
+            protocolModal.classList.add('active');
+
+            // Handle Demo Button inside the modal
+            document.getElementById('use-demo-btn').onclick = () => {
+                localStorage.setItem('alpha_auth', 'true');
+                localStorage.setItem('alpha_auth_token', `demo_${Date.now()}`);
+                localStorage.setItem('alpha_user', 'demo_trader@example.com');
+                localStorage.setItem('alpha_uid', 'demo_uid_123');
+                window.location.href = 'index.html';
+            };
+            return;
         }
 
         try {

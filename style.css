@@ -1,6 +1,6 @@
 :root {
-    --primary: #6366f1;
-    --primary-hover: #4f46e5;
+    --primary: #eab308;
+    --primary-hover: #ca8a04;
     --bg: #0f172a;
     --card-bg: rgba(30, 41, 59, 0.7);
     --text: #f8fafc;
@@ -59,7 +59,7 @@ h3,
     width: 100%;
     max-height: 80px;
     object-fit: contain;
-    filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.3));
+    filter: drop-shadow(0 0 10px rgba(234, 179, 8, 0.3));
 }
 
 .logo {
@@ -104,7 +104,7 @@ h3,
 .nav-item.active {
     background: var(--primary);
     color: white;
-    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 15px rgba(234, 179, 8, 0.3);
 }
 
 /* Content Area */
@@ -316,7 +316,7 @@ h3,
 }
 
 .glass:hover {
-    border-color: rgba(99, 102, 241, 0.3);
+    border-color: rgba(234, 179, 8, 0.3);
 }
 
 .stats-grid {
@@ -643,7 +643,7 @@ td {
 .glass-input:focus {
     background: rgba(255, 255, 255, 0.1);
     border-color: var(--primary);
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    box-shadow: 0 0 0 2px rgba(234, 179, 8, 0.2);
 }
 
 .form-row {
@@ -1086,4 +1086,44 @@ td {
 .btn-danger {
     background: var(--danger);
     color: white;
+}
+
+/* Glass Toast Notification */
+.glass-toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(30, 41, 59, 0.9);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--primary);
+    padding: 1rem 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    animation: slideUpFade 0.5s ease;
+}
+
+.toast-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--text);
+    font-weight: 500;
+}
+
+.toast-content i {
+    color: var(--primary);
+}
+
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
 }

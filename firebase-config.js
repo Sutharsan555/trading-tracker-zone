@@ -9,17 +9,27 @@ const firebaseConfig = {
     measurementId: "G-N59EWLZJG5"
 };
 
-// Initialize Performance Monitoring globally
+// Initialize Firebase once globally
 if (typeof firebase !== 'undefined' && firebaseConfig.apiKey !== "YOUR_API_KEY") {
     if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
+        try {
+            firebase.initializeApp(firebaseConfig);
+            console.log("Firebase initialized successfully");
+        } catch (err) {
+            console.error("Firebase initialization failed:", err);
+        }
     }
-    // Initialize Performance Monitoring
-    const perf = firebase.performance();
-    console.log("Firebase Performance Monitoring initialized");
 
-    // Initialize Analytics
-    const analytics = firebase.analytics();
-    console.log("Firebase Analytics initialized");
+    // Initialize services if app exists
+    if (firebase.apps.length) {
+        try {
+            firebase.performance();
+            console.log("Firebase Performance Monitoring initialized");
+            firebase.analytics();
+            console.log("Firebase Analytics initialized");
+        } catch (err) {
+            console.warn("Non-critical Firebase services failed to initialize:", err);
+        }
+    }
 }
 

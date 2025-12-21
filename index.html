@@ -35,10 +35,7 @@
             }
         };
 
-        // Initialize Firebase on index.html
-        if (typeof firebase !== 'undefined') {
-            firebase.initializeApp(firebaseConfig);
-        }
+        // Firebase is initialized in firebase-config.js
 
         checkAuth();
     </script>
@@ -153,11 +150,6 @@
                     <div class="stat-card glass dashboard-pf-card">
                         <h3>Profit Factor</h3>
                         <p class="stat-value" id="dash-profit-factor">0.00</p>
-                    </div>
-                    <div class="stat-card glass qr-card">
-                        <h3>Profit Review QR</h3>
-                        <div id="profit-qr" class="qr-container"></div>
-                        <p class="qr-hint"><small>Scan to see summary</small></p>
                     </div>
                 </div>
 

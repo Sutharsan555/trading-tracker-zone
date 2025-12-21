@@ -253,8 +253,6 @@ class AlphaTrack {
         if (document.getElementById('dash-avg-loser')) document.getElementById('dash-avg-loser').innerText = `-$${avgLoss.toFixed(2)}`;
         if (document.getElementById('dash-profit-factor')) document.getElementById('dash-profit-factor').innerText = profitFactor;
 
-        this.updateProfitQR(totalNetPL, winRate, this.trades.length);
-
         const completedTasks = this.tasks.filter(t => t.completed).length;
         if (document.getElementById('task-progress')) document.getElementById('task-progress').innerText = `${completedTasks}/${this.tasks.length}`;
     }
@@ -798,22 +796,6 @@ class AlphaTrack {
         lucide.createIcons();
     }
 
-    updateProfitQR(pl, winRate, tradeCount) {
-        const qrContainer = document.getElementById('profit-qr');
-        if (!qrContainer) return;
-
-        const summary = `AlphaTrack Stats\nTotal P/L: $${pl.toFixed(2)}\nWin Rate: ${winRate}%\nTrades: ${tradeCount}`;
-
-        qrContainer.innerHTML = '';
-        this.qrCode = new QRCode(qrContainer, {
-            text: summary,
-            width: 100,
-            height: 100,
-            colorDark: "#6366f1",
-            colorLight: "rgba(255, 255, 255, 0.05)",
-            correctLevel: QRCode.CorrectLevel.H
-        });
-    }
 }
 
 const app = new AlphaTrack();
