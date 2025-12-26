@@ -800,3 +800,16 @@ class AlphaTrack {
 
 const app = new AlphaTrack();
 window.app = app; // Make it globally accessible for inline onclicks
+
+// Service Worker Registration
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+                console.log('SW registered: ', registration);
+            })
+            .catch(registrationError => {
+                console.log('SW registration failed: ', registrationError);
+            });
+    });
+}
