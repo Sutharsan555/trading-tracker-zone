@@ -188,38 +188,36 @@
                     </div>
                 </div>
 
-                <div class="chart-section glass mt-4">
-                    <div class="section-header">
-                        <h2>Equity Curve (Cumulative P/L)</h2>
+                <div class="charts-grid mt-4">
+                    <div class="chart-section glass">
+                        <div class="section-header">
+                            <h2>Equity Curve</h2>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="equity-chart"></canvas>
+                        </div>
                     </div>
-                    <div class="chart-container">
-                        <canvas id="equity-chart"></canvas>
-                    </div>
-                </div>
 
-                <div class="recent-trades-section glass mt-4">
-                    <div class="section-header">
-                        <h2>Recent Trades</h2>
-                        <button class="btn btn-primary" onclick="app.showAddTradeModal()">+ Add Trade</button>
-                    </div>
-                    <div class="table-container">
-                        <table id="recent-trades-table">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Asset</th>
-                                    <th>Side</th>
-                                    <th>Type</th>
-                                    <th>Comm.</th>
-                                    <th>Reason</th>
-                                    <th>P/L</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Trades will be injected here -->
-                            </tbody>
-                        </table>
+                    <div class="recent-trades-section glass">
+                        <div class="section-header">
+                            <h2>Recent Trades</h2>
+                            <button class="btn btn-primary" onclick="app.showAddTradeModal()">+ Add</button>
+                        </div>
+                        <div class="table-container">
+                            <table id="recent-trades-table" class="trades-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Asset</th>
+                                        <th>Side</th>
+                                        <th>P/L</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Trades will be injected here -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -230,7 +228,7 @@
                     <button class="btn btn-primary" onclick="app.showAddTradeModal('forex')">+ Add Forex Trade</button>
                 </div>
                 <div class="table-container glass mt-4">
-                    <table id="forex-table">
+                    <table id="forex-table" class="trades-table">
                         <thead>
                             <tr>
                                 <th>Date</th>
@@ -255,7 +253,7 @@
                     <button class="btn btn-primary" onclick="app.showAddTradeModal('stocks')">+ Add Stock Trade</button>
                 </div>
                 <div class="table-container glass mt-4">
-                    <table id="stocks-table">
+                    <table id="stocks-table" class="trades-table">
                         <thead>
                             <tr>
                                 <th>Date</th>
