@@ -1,0 +1,21 @@
+{
+    "name": "alphatrack-trading-journal",
+    "version": "1.0.0",
+    "description": "AlphaTrack - A premium trading journal with advanced analytics and cloud synchronization.",
+    "main": "index.html",
+    "scripts": {
+        "start": "npx http-server ./ -o",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "trading",
+        "journal",
+        "alphatrack",
+        "analytics"
+    ],
+    "author": "AlphaTrack Team",
+    "license": "ISC",
+    "devDependencies": {
+        "http-server": "^14.1.1"
+    }
+}
