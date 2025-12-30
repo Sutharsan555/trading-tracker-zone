@@ -34,6 +34,9 @@ body {
     display: flex;
     flex-direction: column;
     padding-bottom: env(safe-area-inset-bottom);
+    background-image:
+        radial-gradient(at 0% 0%, rgba(234, 179, 8, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%);
 }
 
 h1,
@@ -924,8 +927,14 @@ td {
 }
 
 .bottom-nav-item.active i {
-    transform: translateY(-2px);
-    filter: drop-shadow(0 0 5px rgba(234, 179, 8, 0.5));
+    transform: translateY(-4px);
+    filter: drop-shadow(0 0 8px rgba(234, 179, 8, 0.6));
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.bottom-nav-item.active span {
+    font-weight: 700;
+    letter-spacing: 0.5px;
 }
 
 /* Responsive Tables - Stacking on small screens */

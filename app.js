@@ -261,6 +261,30 @@ class AlphaTrack {
 
         const completedTasks = this.tasks.filter(t => t.completed).length;
         if (document.getElementById('task-progress')) document.getElementById('task-progress').innerText = `${completedTasks}/${this.tasks.length}`;
+
+        // Max Drawdown Calculation
+        this.updateMaxDrawdown();
+    }
+
+    updateMaxDrawdown() {
+        if (this.trades.length === 0) return;
+
+        const sortedTrades = [...this.trades].sort((a, b) => new Date(a.date) - new Date(b.date));
+        let peak = 0;
+        let maxDrawdown = 0;
+        let cumulativePL = 0;
+
+        sortedTrades.forEach(t => {
+            cumulativePL += parseFloat(t.pl) - parseFloat(t.commission || 0);
+            if (cumulativePL > peak) peak = cumulativePL;
+            const dd = peak - cumulativePL;
+            if (dd > maxDrawdown) maxDrawdown = dd;
+        });
+
+        const ddElement = document.getElementById('dash-max-drawdown');
+        if (ddElement) {
+            ddElement.innerText = `-$${maxDrawdown.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
     }
 
     renderDashboard() {
