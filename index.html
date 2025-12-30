@@ -59,9 +59,16 @@
             const isAuth = localStorage.getItem('alpha_auth') === 'true';
             const hasToken = !!localStorage.getItem('alpha_auth_token');
             const isSocialDemo = localStorage.getItem('alpha_auth_token')?.startsWith('demo_');
+            const isFirstTime = !localStorage.getItem('alpha_app_initialized');
+
+            // Mark app as initialized (only once)
+            if (isFirstTime) {
+                localStorage.setItem('alpha_app_initialized', 'true');
+            }
 
             // If not authenticated and no token, redirect to login
-            if (!isAuth || !hasToken) {
+            // This includes first-time users
+            if (!isAuth || !hasToken || isFirstTime) {
                 window.location.href = 'auth.html';
                 return;
             }

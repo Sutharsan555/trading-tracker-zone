@@ -263,6 +263,8 @@ document.addEventListener('DOMContentLoaded', () => {
             submitBtn.innerText = 'Signing in...';
             submitBtn.disabled = true;
             await authService.login(email, password);
+            // Mark app as initialized after successful first-time login
+            localStorage.setItem('alpha_app_initialized', 'true');
             window.location.href = 'index.html';
         } catch (err) {
             console.error('Login error:', err);
@@ -293,6 +295,8 @@ document.addEventListener('DOMContentLoaded', () => {
             submitBtn.innerText = 'Creating account...';
             submitBtn.disabled = true;
             await authService.register(name, email, password);
+            // Mark app as initialized after successful first-time signup
+            localStorage.setItem('alpha_app_initialized', 'true');
             // Redirection is usually handled by authService.register -> login, 
             // but we'll ensure it here for consistency.
             window.location.href = 'index.html';
@@ -317,6 +321,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem('alpha_auth_token', `demo_${Date.now()}`);
                 localStorage.setItem('alpha_user', 'demo_trader@example.com');
                 localStorage.setItem('alpha_uid', 'demo_uid_123');
+                // Mark app as initialized for demo login
+                localStorage.setItem('alpha_app_initialized', 'true');
                 window.location.href = 'index.html';
             };
             return;
@@ -324,6 +330,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             await authService.socialLogin(provider);
+            // Mark app as initialized after successful first-time social login
+            localStorage.setItem('alpha_app_initialized', 'true');
             window.location.href = 'index.html';
         } catch (err) {
             console.error('Social login error:', err);
