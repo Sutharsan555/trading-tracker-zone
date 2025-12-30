@@ -1,12 +1,35 @@
 {
   "name": "AlphaTrack | Premium Trading Journal",
   "short_name": "AlphaTrack",
-  "description": "Premium trading journal for Forex, Stocks, and Crypto.",
+  "description": "Premium trading journal for Forex, Stocks, and Crypto. Track trades, analyze performance, and manage your trading discipline.",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#d4af37",
+  "orientation": "portrait-primary",
+  "categories": ["finance", "productivity"],
+  "screenshots": [
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
   "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
     {
       "src": "logo.png",
       "sizes": "512x512",
@@ -14,5 +37,20 @@
       "purpose": "any maskable"
     }
   ],
-  "orientation": "portrait"
+  "shortcuts": [
+    {
+      "name": "Add Trade",
+      "short_name": "Trade",
+      "description": "Quickly add a new trade",
+      "url": "./index.html?tab=forex",
+      "icons": [{"src": "logo.png", "sizes": "192x192"}]
+    },
+    {
+      "name": "Journal",
+      "short_name": "Journal",
+      "description": "Write a journal entry",
+      "url": "./index.html?tab=journal",
+      "icons": [{"src": "logo.png", "sizes": "192x192"}]
+    }
+  ]
 }
