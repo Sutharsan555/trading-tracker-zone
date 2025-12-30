@@ -2,6 +2,7 @@ const CACHE_NAME = 'alpha-track-v1';
 const ASSETS_TO_CACHE = [
     './',
     'index.html',
+    'auth.html',
     'style.css',
     'app.js',
     'auth.js',
