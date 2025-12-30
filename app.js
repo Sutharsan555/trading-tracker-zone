@@ -101,7 +101,7 @@ class AlphaTrack {
 
     setupEventListeners() {
         // Tab switching
-        document.querySelectorAll('.nav-item').forEach(item => {
+        document.querySelectorAll('.nav-item, .bottom-nav-item').forEach(item => {
             item.addEventListener('click', (e) => {
                 const tab = e.currentTarget.getAttribute('data-tab');
                 this.switchTab(tab);
@@ -174,11 +174,17 @@ class AlphaTrack {
     }
 
     switchTab(tabId) {
-        document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.nav-item, .bottom-nav-item').forEach(btn => btn.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
-        document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
-        document.getElementById(tabId).classList.add('active');
+        const sidebarBtn = document.querySelector(`.nav-item[data-tab="${tabId}"]`);
+        const bottomBtn = document.querySelector(`.bottom-nav-item[data-tab="${tabId}"]`);
+
+        if (sidebarBtn) sidebarBtn.classList.add('active');
+        if (bottomBtn) bottomBtn.classList.add('active');
+
+        const content = document.getElementById(tabId);
+        if (content) content.classList.add('active');
 
         this.activeTab = tabId;
         const title = tabId.charAt(0).toUpperCase() + tabId.slice(1);
@@ -264,14 +270,14 @@ class AlphaTrack {
         this.trades.slice(-5).reverse().forEach(trade => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${trade.date}</td>
-                <td>${trade.asset}</td>
-                <td><span class="badge-side ${trade.side === 'Long' ? 'side-long' : 'side-short'}">${trade.side || '-'}</span></td>
-                <td><span class="badge">${trade.type.toUpperCase()}</span></td>
-                <td>$${parseFloat(trade.commission || 0).toFixed(2)}</td>
-                <td><small>${trade.reason || '-'}</small></td>
-                <td class="${trade.pl >= 0 ? 'pl-positive' : 'pl-negative'}">$${trade.pl}</td>
-                <td>${trade.pl >= 0 ? 'Profit' : 'Loss'}</td>
+                <td data-label="Date">${trade.date}</td>
+                <td data-label="Asset">${trade.asset}</td>
+                <td data-label="Side"><span class="badge-side ${trade.side === 'Long' ? 'side-long' : 'side-short'}">${trade.side || '-'}</span></td>
+                <td data-label="Type"><span class="badge">${trade.type.toUpperCase()}</span></td>
+                <td data-label="Comm.">$${parseFloat(trade.commission || 0).toFixed(2)}</td>
+                <td data-label="Reason"><small>${trade.reason || '-'}</small></td>
+                <td data-label="P/L" class="${trade.pl >= 0 ? 'pl-positive' : 'pl-negative'}">$${trade.pl}</td>
+                <td data-label="Status">${trade.pl >= 0 ? 'Profit' : 'Loss'}</td>
             `;
             tbody.appendChild(tr);
         });
@@ -289,15 +295,15 @@ class AlphaTrack {
         this.trades.forEach((trade, index) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${trade.date}</td>
-                <td>${trade.asset}</td>
-                <td><span class="badge-side ${trade.side === 'Long' ? 'side-long' : 'side-short'}">${trade.side || '-'}</span></td>
-                <td>${trade.entry}</td>
-                <td>${trade.exit}</td>
-                <td>$${parseFloat(trade.commission || 0).toFixed(2)}</td>
-                <td><small>${trade.reason || '-'}</small></td>
-                <td class="${trade.pl >= 0 ? 'pl-positive' : 'pl-negative'}">$${trade.pl}</td>
-                <td>
+                <td data-label="Date">${trade.date}</td>
+                <td data-label="Asset">${trade.asset}</td>
+                <td data-label="Side"><span class="badge-side ${trade.side === 'Long' ? 'side-long' : 'side-short'}">${trade.side || '-'}</span></td>
+                <td data-label="Entry">${trade.entry}</td>
+                <td data-label="Exit">${trade.exit}</td>
+                <td data-label="Comm.">$${parseFloat(trade.commission || 0).toFixed(2)}</td>
+                <td data-label="Reason"><small>${trade.reason || '-'}</small></td>
+                <td data-label="P/L" class="${trade.pl >= 0 ? 'pl-positive' : 'pl-negative'}">$${trade.pl}</td>
+                <td data-label="Actions">
                     <div class="action-group">
                         <button class="btn-icon" onclick="app.editTrade(${index})"><i data-lucide="edit-3"></i></button>
                         <button class="btn-icon" onclick="app.deleteTrade(${index})"><i data-lucide="trash-2"></i></button>
@@ -317,16 +323,16 @@ class AlphaTrack {
                 const netPl = parseFloat(trade.pl) - parseFloat(trade.commission || 0);
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${trade.date}</td>
-                    <td>${trade.asset}</td>
-                    <td><span class="badge-side ${trade.side === 'Long' ? 'side-long' : 'side-short'}">${trade.side || '-'}</span></td>
-                    <td><span class="badge">${trade.type.toUpperCase()}</span></td>
-                    <td>${trade.entry}</td>
-                    <td>${trade.exit}</td>
-                    <td>$${parseFloat(trade.commission || 0).toFixed(2)}</td>
-                    <td><small>${trade.reason || '-'}</small></td>
-                    <td class="${netPl >= 0 ? 'pl-positive' : 'pl-negative'}">$${netPl.toFixed(2)}</td>
-                    <td>${((Math.abs(netPl) / parseFloat(trade.entry)) * 100).toFixed(2)}%</td>
+                    <td data-label="Date">${trade.date}</td>
+                    <td data-label="Asset">${trade.asset}</td>
+                    <td data-label="Side"><span class="badge-side ${trade.side === 'Long' ? 'side-long' : 'side-short'}">${trade.side || '-'}</span></td>
+                    <td data-label="Type"><span class="badge">${trade.type.toUpperCase()}</span></td>
+                    <td data-label="Entry">${trade.entry}</td>
+                    <td data-label="Exit">${trade.exit}</td>
+                    <td data-label="Comm.">$${parseFloat(trade.commission || 0).toFixed(2)}</td>
+                    <td data-label="Reason"><small>${trade.reason || '-'}</small></td>
+                    <td data-label="Net P/L" class="${netPl >= 0 ? 'pl-positive' : 'pl-negative'}">$${netPl.toFixed(2)}</td>
+                    <td data-label="Efficiency">${((Math.abs(netPl) / parseFloat(trade.entry)) * 100).toFixed(2)}%</td>
                 `;
                 fullTable.appendChild(tr);
             });

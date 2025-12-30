@@ -10,8 +10,9 @@
     --border: rgba(255, 255, 255, 0.1);
     --glass-bg: rgba(255, 255, 255, 0.05);
     --glass-border: rgba(255, 255, 255, 0.1);
-    --mobile-nav-height: 60px;
+    --mobile-nav-height: 65px;
     --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    --safe-bottom: env(safe-area-inset-bottom);
 }
 
 * {
@@ -21,13 +22,18 @@
     font-family: 'Inter', sans-serif;
 }
 
+html {
+    height: 100%;
+}
+
 body {
     background-color: var(--bg);
     color: var(--text);
     overflow: hidden;
-    height: 100vh;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
+    padding-bottom: env(safe-area-inset-bottom);
 }
 
 h1,
@@ -39,7 +45,7 @@ h3,
 
 .app-container {
     display: flex;
-    height: 100vh;
+    height: 100dvh;
 }
 
 /* Sidebar */
@@ -112,6 +118,7 @@ h3,
     flex: 1;
     padding: 2rem 3rem;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* Network Status */
@@ -718,12 +725,36 @@ td {
 }
 
 @media (max-width: 1024px) {
+    .sidebar {
+        width: 80px;
+        padding: 1.5rem 0.5rem;
+    }
+
+    .sidebar .logo span,
+    .sidebar .nav-item span,
+    .sidebar .user-info,
+    .sidebar .sidebar-footer span,
+    .sidebar .btn-logout span {
+        display: none;
+    }
+
+    .sidebar .nav-item {
+        justify-content: center;
+        padding: 0.75rem;
+    }
+
+    .sidebar .nav-item i {
+        width: 24px;
+        height: 24px;
+    }
+
     .content {
         padding: 1.5rem 2rem;
     }
 
     .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
     }
 }
 
@@ -735,11 +766,25 @@ td {
         bottom: 0;
         transform: translateX(-100%);
         width: 280px;
+        z-index: 2000;
     }
 
     .sidebar.active {
         transform: translateX(0);
         box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .sidebar .logo span,
+    .sidebar .nav-item span,
+    .sidebar .user-info,
+    .sidebar .sidebar-footer span,
+    .sidebar .btn-logout span {
+        display: inline;
+    }
+
+    .sidebar .nav-item {
+        justify-content: flex-start;
+        padding: 0.75rem 1rem;
     }
 
     .mobile-only {
@@ -749,6 +794,11 @@ td {
     .content {
         padding: 1rem;
         width: 100%;
+        padding-bottom: calc(var(--mobile-nav-height) + 2rem);
+    }
+
+    .top-bar {
+        margin-bottom: 1rem;
     }
 
     .header-left h1 {
@@ -756,11 +806,16 @@ td {
     }
 
     .stats-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
     }
 
     .stat-card {
-        padding: 1.25rem;
+        padding: 1rem;
+    }
+
+    .stat-value {
+        font-size: 1.25rem;
     }
 
     .user-info span {
@@ -795,14 +850,162 @@ td {
         font-size: 0.6rem;
     }
 
+    .modal-content {
+        padding: 1.5rem;
+        margin: 1rem;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
     .form-row {
         grid-template-columns: 1fr;
     }
+}
 
-    .modal-content {
-        max-width: 90%;
-        padding: 1.5rem;
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
     }
+
+    .top-bar h1 {
+        font-size: 1.25rem;
+    }
+
+    .ticker-item {
+        margin-right: 1.5rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--mobile-nav-height);
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--glass-border);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 1rem;
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 1000;
+}
+
+.bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+}
+
+.bottom-nav-item i {
+    width: 20px;
+    height: 20px;
+}
+
+.bottom-nav-item span {
+    font-size: 0.65rem;
+    font-weight: 500;
+}
+
+.bottom-nav-item.active {
+    color: var(--primary);
+}
+
+.bottom-nav-item.active i {
+    transform: translateY(-2px);
+    filter: drop-shadow(0 0 5px rgba(234, 179, 8, 0.5));
+}
+
+/* Responsive Tables - Stacking on small screens */
+@media (max-width: 600px) {
+
+    .table-container table,
+    .table-container thead,
+    .table-container tbody,
+    .table-container th,
+    .table-container td,
+    .table-container tr {
+        display: block;
+    }
+
+    .table-container thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    .table-container tr {
+        margin-bottom: 1rem;
+        background: var(--glass-bg);
+        border-radius: 1rem;
+        padding: 1rem;
+        border: 1px solid var(--glass-border);
+    }
+
+    .table-container td {
+        border: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        position: relative;
+        padding-left: 50%;
+        text-align: right;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    .table-container td:last-child {
+        border-bottom: none;
+    }
+
+    .table-container td:before {
+        content: attr(data-label);
+        position: absolute;
+        left: 1rem;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: 600;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+    }
+}
+
+/* Fluid Typography */
+h1 {
+    font-size: clamp(1.5rem, 5vw, 2.25rem);
+}
+
+h2 {
+    font-size: clamp(1.25rem, 4vw, 1.875rem);
+}
+
+h3 {
+    font-size: clamp(1rem, 3vw, 1.5rem);
+}
+
+p,
+span,
+td {
+    font-size: clamp(0.875rem, 2vw, 1rem);
+}
+
+.modal-content {
+    max-width: 90%;
+    padding: 1.5rem;
 }
 
 /* Tablet optimization for calendar */
@@ -932,7 +1135,7 @@ td {
     background: radial-gradient(circle at top right, #1e293b 0%, #0f172a 100%);
     overflow: auto !important;
     height: auto !important;
-    min-height: 100vh !important;
+    min-height: 100dvh !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
