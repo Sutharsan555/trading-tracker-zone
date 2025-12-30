@@ -153,6 +153,12 @@ class AlphaTrack {
         localStorage.removeItem('alpha_auth_token');
         localStorage.removeItem('alpha_user');
         localStorage.removeItem('alpha_uid');
+
+        // Clear user data to prevent leakage
+        localStorage.removeItem('alpha_trades');
+        localStorage.removeItem('alpha_journal');
+        localStorage.removeItem('alpha_tasks');
+
         window.location.href = 'auth.html';
     }
 
