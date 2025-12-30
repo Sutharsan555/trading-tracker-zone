@@ -66,6 +66,14 @@
                 localStorage.setItem('alpha_app_initialized', 'true');
             }
 
+            // Mobile Bypass: Do not force login on mobile devices
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+            if (isMobile) {
+                console.log("Mobile device detected. Bypassing login verification.");
+                return;
+            }
+
             // If not authenticated and no token, redirect to login
             // This includes first-time users
             if (!isAuth || !hasToken || isFirstTime) {
