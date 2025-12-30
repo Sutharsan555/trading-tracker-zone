@@ -112,6 +112,14 @@ class MockAuthService {
         return btoa(password.split('').reverse().join(''));
     }
 
+    // Unified session storage helper
+    saveSession(user, token) {
+        localStorage.setItem('alpha_auth', 'true');
+        localStorage.setItem('alpha_auth_token', token);
+        localStorage.setItem('alpha_user', user.email);
+        localStorage.setItem('alpha_uid', user.uid);
+    }
+
     async register(name, email, password) {
         // Create user in Firebase Auth
         if (this.auth) {
@@ -126,7 +134,9 @@ class MockAuthService {
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                return this.login(email, password);
+                const token = await userCredential.user.getIdToken();
+                this.saveSession(userCredential.user, token);
+                return { success: true };
             } catch (err) {
                 console.error('Registration error:', err);
                 if (err.code === 'auth/email-already-in-use') {
@@ -143,26 +153,31 @@ class MockAuthService {
         // Local Fallback
         await this.delay();
         if (this.users.find(u => u.email === email)) throw new Error('User already exists');
-        this.users.push({ id: Date.now(), name, email, password: this.hashPassword(password) });
+        const newUser = { id: Date.now(), name, email, password: this.hashPassword(password) };
+        this.users.push(newUser);
         localStorage.setItem('alpha_users', JSON.stringify(this.users));
-        return this.login(email, password);
+        this.saveSession({ email, uid: `mock_${newUser.id}` }, `mock_token_${newUser.id}`);
+        return { success: true };
     }
 
     async login(email, password) {
         if (this.auth) {
-            const userCredential = await this.auth.signInWithEmailAndPassword(email, password);
-            const token = await userCredential.user.getIdToken();
+            try {
+                const userCredential = await this.auth.signInWithEmailAndPassword(email, password);
+                const token = await userCredential.user.getIdToken();
+                this.saveSession(userCredential.user, token);
 
-            localStorage.setItem('alpha_auth', 'true');
-            localStorage.setItem('alpha_auth_token', token);
-            localStorage.setItem('alpha_user', email);
-            localStorage.setItem('alpha_uid', userCredential.user.uid);
+                // Send Notifications
+                await this.emailService.sendLoginNotification(email);
+                this.pushService.send("Login Successful", `Welcome back, ${email}!`);
 
-            // Send Notifications
-            await this.emailService.sendLoginNotification(email);
-            this.pushService.send("Login Successful", `Welcome back, ${email}!`);
-
-            return { success: true };
+                return { success: true };
+            } catch (err) {
+                if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+                    throw new Error('Invalid email or password.');
+                }
+                throw err;
+            }
         }
 
         // Local Fallback
@@ -170,18 +185,14 @@ class MockAuthService {
         const user = this.users.find(u => u.email === email);
         if (!user || user.password !== this.hashPassword(password)) throw new Error('Invalid email or password');
 
-        localStorage.setItem('alpha_auth', 'true');
-        localStorage.setItem('alpha_auth_token', `mock_${Date.now()}`);
-        localStorage.setItem('alpha_user', email);
+        this.saveSession({ email, uid: `mock_${user.id}` }, `mock_token_${user.id}`);
         return { success: true };
     }
 
     async socialLogin(provider) {
         if (!this.auth) {
             alert("Firebase not configured. Using mock login.");
-            localStorage.setItem('alpha_auth', 'true');
-            localStorage.setItem('alpha_auth_token', `mock_social_${Date.now()}`);
-            localStorage.setItem('alpha_user', `${provider}_user@example.com`);
+            this.saveSession({ email: `${provider}_user@example.com`, uid: `mock_social_${Date.now()}` }, `mock_social_token_${Date.now()}`);
             return { success: true };
         }
 
@@ -195,23 +206,21 @@ class MockAuthService {
         try {
             const result = await this.auth.signInWithPopup(authProvider);
             const token = await result.user.getIdToken();
-
-            localStorage.setItem('alpha_auth', 'true');
-            localStorage.setItem('alpha_auth_token', token);
-            localStorage.setItem('alpha_user', result.user.email);
-            localStorage.setItem('alpha_uid', result.user.uid);
-
+            this.saveSession(result.user, token);
             return { success: true };
         } catch (err) {
             console.error('Social login error:', err);
+            let errorMessage = err.message;
             if (err.code === 'auth/operation-not-allowed') {
-                throw new Error(`Social login for ${provider} is not enabled in the Firebase Console.`);
+                errorMessage = `Social login for ${provider} is not enabled in the Firebase Console.`;
             } else if (err.code === 'auth/unauthorized-domain') {
-                throw new Error('This domain is not authorized for Firebase Authentication. Please add it to "Authorized domains" in the Firebase Console.');
+                errorMessage = 'This domain is not authorized for Firebase Authentication. Please add it to "Authorized domains" in the Firebase Console.';
             } else if (err.code === 'auth/invalid-credential') {
-                throw new Error('Firebase rejected the credential. Ensure the Google/Facebook provider is correctly configured.');
+                errorMessage = 'Firebase rejected the credential. Ensure the Google/Facebook provider is correctly configured.';
+            } else if (err.code === 'auth/popup-closed-by-user') {
+                errorMessage = 'Login canceled. Please try again.';
             }
-            throw err;
+            throw new Error(errorMessage);
         }
     }
 }

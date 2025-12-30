@@ -64,27 +64,66 @@ class AlphaTrack {
     }
 
     setupAuth() {
-        // Display user email
-        const email = localStorage.getItem('alpha_user');
-        const userDisplay = document.getElementById('user-email');
-        if (userDisplay && email) {
-            userDisplay.innerText = email;
+        if (typeof firebase === 'undefined') {
+            console.warn('Firebase not loaded. Authentication limited.');
+            return;
         }
+
+        firebase.auth().onAuthStateChanged(async (user) => {
+            if (user) {
+                console.log("Authenticated as:", user.email);
+                this.uid = user.uid;
+                localStorage.setItem('alpha_uid', user.uid);
+                localStorage.setItem('alpha_user', user.email);
+                localStorage.setItem('alpha_auth', 'true');
+
+                // Update UI
+                const userDisplay = document.getElementById('user-email');
+                if (userDisplay) userDisplay.innerText = user.email;
+
+                // Load data from cloud
+                await this.loadCloudData();
+            } else {
+                console.log("No user authenticated.");
+                // Only redirect if not on a demo/mock session
+                const isAuth = localStorage.getItem('alpha_auth') === 'true';
+                const hasToken = localStorage.getItem('alpha_auth_token');
+                const isMock = hasToken && (hasToken.startsWith('mock_') || hasToken.startsWith('demo_'));
+
+                if (!isMock && isAuth) {
+                    console.warn("Session lost. Redirecting to login.");
+                    this.logout();
+                } else if (isMock) {
+                    console.log("Running in Mock/Demo mode.");
+                    const email = localStorage.getItem('alpha_user');
+                    const userDisplay = document.getElementById('user-email');
+                    if (userDisplay && email) userDisplay.innerText = email;
+                }
+            }
+        });
 
         // Logout logic
         const logoutBtn = document.getElementById('logout-btn');
         if (logoutBtn) {
-            logoutBtn.addEventListener('click', async () => {
-                if (typeof firebase !== 'undefined') {
-                    await firebase.auth().signOut();
-                }
-                localStorage.removeItem('alpha_auth');
-                localStorage.removeItem('alpha_auth_token');
-                localStorage.removeItem('alpha_user');
-                localStorage.removeItem('alpha_uid');
-                window.location.href = 'auth.html';
-            });
+            logoutBtn.addEventListener('click', () => this.logout());
         }
+    }
+
+    async logout() {
+        console.log("Logging out...");
+        try {
+            if (typeof firebase !== 'undefined' && firebase.auth().currentUser) {
+                await firebase.auth().signOut();
+            }
+        } catch (err) {
+            console.error("Firebase logout error:", err);
+        }
+
+        localStorage.removeItem('alpha_auth');
+        localStorage.removeItem('alpha_auth_token');
+        localStorage.removeItem('alpha_user');
+        localStorage.removeItem('alpha_uid');
+        window.location.href = 'auth.html';
     }
 
     init() {
@@ -94,9 +133,13 @@ class AlphaTrack {
         this.setupNetworkMonitoring();
         this.startMarketTicker();
         lucide.createIcons();
-        document.getElementById('current-date').innerText = new Date().toLocaleDateString('en-US', {
-            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-        });
+
+        const dateEl = document.getElementById('current-date');
+        if (dateEl) {
+            dateEl.innerText = new Date().toLocaleDateString('en-US', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            });
+        }
     }
 
     setupEventListeners() {
@@ -118,6 +161,12 @@ class AlphaTrack {
         document.getElementById('journal-form').addEventListener('submit', (e) => {
             e.preventDefault();
             this.handleJournalSubmit();
+        });
+
+        // Task Form
+        document.getElementById('task-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleTaskSubmit();
         });
     }
 
@@ -365,6 +414,29 @@ class AlphaTrack {
         lucide.createIcons();
     }
 
+    // Toast Notification Helper
+    showToast(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = `glass-toast toast-${type}`;
+        toast.innerHTML = `
+            <div class="toast-content">
+                <i data-lucide="${type === 'success' ? 'check-circle' : (type === 'error' ? 'alert-circle' : 'info')}"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        container.appendChild(toast);
+        lucide.createIcons();
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(-20px)';
+            setTimeout(() => toast.remove(), 500);
+        }, 3000);
+    }
+
     renderTasks() {
         const list = document.getElementById('tasks-list');
         list.innerHTML = '';
@@ -392,32 +464,66 @@ class AlphaTrack {
         this.tasks[index].completed = !this.tasks[index].completed;
         this.saveTasks();
         this.renderAll();
+        this.showToast(this.tasks[index].completed ? 'Task completed!' : 'Task reopened.', 'success');
     }
 
     editTask(index) {
-        const newText = prompt('Edit task:', this.tasks[index].text);
-        if (newText !== null && newText.trim() !== "") {
-            this.tasks[index].text = newText.trim();
-            this.saveTasks();
-            this.renderTasks();
-        }
+        const task = this.tasks[index];
+        const modal = document.getElementById('task-modal');
+        const title = document.getElementById('task-modal-title');
+
+        title.innerText = 'Edit Daily Task';
+        document.getElementById('task-id').value = index;
+        document.getElementById('task-description').value = task.text;
+
+        modal.classList.add('active');
+        document.getElementById('task-description').focus();
     }
 
     deleteTask(index) {
         if (confirm('Delete this task?')) {
+            const taskText = this.tasks[index].text;
             this.tasks.splice(index, 1);
             this.saveTasks();
             this.renderAll();
+            this.showToast(`Deleted: ${taskText}`, 'info');
         }
     }
 
     addTask() {
-        const text = prompt('Enter task description:');
-        if (text) {
+        const modal = document.getElementById('task-modal');
+        const title = document.getElementById('task-modal-title');
+
+        title.innerText = 'New Daily Task';
+        document.getElementById('task-id').value = '';
+        document.getElementById('task-description').value = '';
+
+        modal.classList.add('active');
+        document.getElementById('task-description').focus();
+    }
+
+    closeTaskModal() {
+        document.getElementById('task-modal').classList.remove('active');
+        document.getElementById('task-form').reset();
+    }
+
+    handleTaskSubmit() {
+        const index = document.getElementById('task-id').value;
+        const text = document.getElementById('task-description').value.trim();
+
+        if (!text) return;
+
+        if (index !== '') {
+            this.tasks[index].text = text;
+            this.showToast('Task updated!', 'success');
+        } else {
             this.tasks.push({ id: Date.now(), text, completed: false });
-            this.saveTasks();
-            this.renderTasks();
+            this.showToast('New task added!', 'success');
         }
+
+        this.saveTasks();
+        this.closeTaskModal();
+        this.renderTasks();
     }
 
     saveTasks() {
