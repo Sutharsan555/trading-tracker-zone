@@ -25,19 +25,49 @@ class AlphaTrack {
     async loadCloudData() {
         if (!this.db || !this.uid) return;
 
-        console.log('Syncing with cloud...');
-        try {
-            const doc = await this.db.collection('user_data').doc(this.uid).get();
+        console.log('Establishing real-time cloud sync...');
+
+        // Use onSnapshot for real-time updates
+        this.unsubscribe = this.db.collection('user_data').doc(this.uid).onSnapshot((doc) => {
             if (doc.exists) {
                 const data = doc.data();
-                this.trades = data.trades || this.trades;
-                this.journal = data.journal || this.journal;
-                this.tasks = data.tasks || this.tasks;
+                console.log('Real-time update received:', data.lastSync);
+
+                // Only update if data has changed to prevent unnecessary re-renders
+                if (JSON.stringify(this.trades) !== JSON.stringify(data.trades || [])) {
+                    this.trades = data.trades || [];
+                }
+                if (JSON.stringify(this.journal) !== JSON.stringify(data.journal || [])) {
+                    this.journal = data.journal || [];
+                }
+                if (JSON.stringify(this.tasks) !== JSON.stringify(data.tasks || [])) {
+                    this.tasks = data.tasks || [];
+                }
+
                 this.saveLocal();
                 this.renderAll();
+                this.updateSyncBadge(true);
             }
-        } catch (err) {
-            console.error('Cloud load failed:', err);
+        }, (err) => {
+            console.error('Real-time sync failed:', err);
+            this.updateSyncBadge(false);
+        });
+    }
+
+    updateSyncBadge(isSynced) {
+        const badge = document.getElementById('network-status');
+        const text = document.getElementById('status-text');
+        if (badge && text) {
+            if (isSynced) {
+                badge.classList.add('synced');
+                text.innerText = 'Synced';
+                setTimeout(() => {
+                    badge.classList.remove('synced');
+                    if (navigator.onLine) text.innerText = 'Online';
+                }, 2000);
+            } else {
+                text.innerText = 'Sync Error';
+            }
         }
     }
 
@@ -140,6 +170,7 @@ class AlphaTrack {
                 weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
             });
         }
+        this.generateMobileQR();
     }
 
     setupEventListeners() {
@@ -898,6 +929,30 @@ class AlphaTrack {
             this.saveLocal();
             this.syncToCloud();
             this.renderJournal();
+        }
+    }
+
+    generateMobileQR() {
+        const qrContainer = document.getElementById('mobile-qr');
+        if (!qrContainer) return;
+
+        qrContainer.innerHTML = '';
+        const currentUrl = window.location.href.split('?')[0].split('#')[0];
+
+        try {
+            this.qrCode = new QRCode(qrContainer, {
+                text: currentUrl,
+                width: 180,
+                height: 180,
+                colorDark: "#d4af37",
+                colorLight: "transparent",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            console.log("QR Code generated for:", currentUrl);
+        } catch (err) {
+            console.error("QR Generation failed:", err);
+            qrContainer.innerHTML = '<i data-lucide="qr-code"></i><p>Error generating QR</p>';
+            lucide.createIcons();
         }
     }
 

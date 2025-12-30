@@ -1376,3 +1376,78 @@ td {
         transform: translate(-50%, 0);
     }
 }
+
+/* Network/Sync Status Enhancements */
+.network-badge.synced {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: var(--success);
+    color: var(--success);
+    animation: sync-pulse 0.5s ease-in-out;
+}
+
+@keyframes sync-pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Mobile Connection QR Styles */
+.qr-container-aesthetic {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    border: 2px dashed var(--glass-border);
+    transition: all 0.3s ease;
+}
+
+.qr-container-aesthetic:hover {
+    border-color: var(--primary);
+    background: rgba(234, 179, 8, 0.05);
+}
+
+#mobile-qr {
+    background: white;
+    padding: 10px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+#mobile-qr img {
+    display: block;
+}
+
+.qr-container-aesthetic span {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--primary);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
