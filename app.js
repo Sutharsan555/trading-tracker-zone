@@ -572,14 +572,16 @@ class AlphaTrack {
         document.getElementById('trade-modal').classList.remove('active');
         document.getElementById('trade-form').reset();
         this.editingTradeIndex = null;
-        document.querySelector('#trade-modal h2').innerText = 'Add New Trade';
+        const titleEl = document.getElementById('trade-modal-title');
+        if (titleEl) titleEl.innerText = 'Add New Trade';
     }
 
     editTrade(index) {
         const trade = this.trades[index];
         this.editingTradeIndex = index;
 
-        document.querySelector('#trade-modal h2').innerText = 'Edit Trade';
+        const titleEl = document.getElementById('trade-modal-title');
+        if (titleEl) titleEl.innerText = 'Edit Trade';
         document.getElementById('trade-type').value = trade.type;
         document.getElementById('trade-asset').value = trade.asset;
         document.getElementById('trade-side').value = trade.side || 'Long';

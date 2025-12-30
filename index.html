@@ -430,52 +430,64 @@
     <!-- Modals -->
     <div id="trade-modal" class="modal">
         <div class="modal-content glass">
-            <h2>Add New Trade</h2>
+            <div class="modal-header mb-4">
+                <h2 id="trade-modal-title">Add New Trade</h2>
+                <p class="muted-text">Fill in the details of your latest position</p>
+            </div>
             <form id="trade-form">
                 <input type="hidden" id="trade-type" value="forex">
-                <div class="form-group">
-                    <label>Asset (Pair/Symbol)</label>
-                    <input type="text" id="trade-asset" required placeholder="e.g. EUR/USD or AAPL">
-                </div>
-                <div class="form-group">
-                    <label>Trade Side</label>
-                    <select id="trade-side" class="glass-input" required>
-                        <option value="Long">Long / Buy</option>
-                        <option value="Short">Short / Sell</option>
-                    </select>
-                </div>
+
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Entry Price</label>
-                        <input type="number" id="trade-entry" step="0.00001" required>
+                        <label for="trade-asset">Asset (Pair/Symbol)</label>
+                        <input type="text" id="trade-asset" required placeholder="e.g. EUR/USD or AAPL">
                     </div>
                     <div class="form-group">
-                        <label>Exit Price</label>
-                        <input type="number" id="trade-exit" step="0.00001" required>
+                        <label for="trade-side">Trade Side</label>
+                        <select id="trade-side" class="glass-input" required>
+                            <option value="Long">Long / Buy</option>
+                            <option value="Short">Short / Sell</option>
+                        </select>
                     </div>
                 </div>
+
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Profit / Loss ($)</label>
-                        <input type="number" id="trade-pl" step="0.01" required>
+                        <label for="trade-entry">Entry Price</label>
+                        <input type="number" id="trade-entry" step="0.00001" required placeholder="0.00000">
                     </div>
                     <div class="form-group">
-                        <label>Commission ($)</label>
+                        <label for="trade-exit">Exit Price</label>
+                        <input type="number" id="trade-exit" step="0.00001" required placeholder="0.00000">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="trade-pl">Profit / Loss ($)</label>
+                        <input type="number" id="trade-pl" step="0.01" required placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label for="trade-commission">Commission ($)</label>
                         <input type="number" id="trade-commission" step="0.01" value="0.00" required>
                     </div>
                 </div>
+
                 <div class="form-group">
-                    <label>Date</label>
+                    <label for="trade-date">Date and Time</label>
                     <input type="date" id="trade-date" required>
                 </div>
+
                 <div class="form-group">
-                    <label>Trade Reason / Setup</label>
-                    <textarea id="trade-reason" placeholder="e.g. Trendline breakout, RSI divergence..."
-                        class="glass-input" rows="3"></textarea>
+                    <label for="trade-reason">Trade Reason / Setup</label>
+                    <textarea id="trade-reason"
+                        placeholder="What was your reasoning for this trade? (e.g. Trendline breakout, RSI divergence...)"
+                        class="glass-input" rows="4"></textarea>
                 </div>
+
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" onclick="app.closeModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Trade</button>
+                    <button type="submit" class="btn btn-primary">Save Position</button>
                 </div>
             </form>
         </div>
@@ -484,20 +496,24 @@
     <!-- Journal Modal -->
     <div id="journal-modal" class="modal">
         <div class="modal-content glass">
-            <h2 id="journal-modal-title">New Journal Entry</h2>
+            <div class="modal-header mb-4">
+                <h2 id="journal-modal-title">New Journal Entry</h2>
+                <p class="muted-text">Capture your market thoughts and reflections</p>
+            </div>
             <form id="journal-form">
                 <input type="hidden" id="journal-id">
                 <div class="form-group">
-                    <label>Title</label>
+                    <label for="journal-title">Entry Title</label>
                     <input type="text" id="journal-title" required placeholder="e.g. FOMC Meeting Reflection">
                 </div>
                 <div class="form-group">
-                    <label>Date</label>
+                    <label for="journal-date">Date</label>
                     <input type="date" id="journal-date" required>
                 </div>
                 <div class="form-group">
-                    <label>Entry Content</label>
-                    <textarea id="journal-content" placeholder="How was the market today? What did you learn?"
+                    <label for="journal-content">Reflection</label>
+                    <textarea id="journal-content"
+                        placeholder="How was the market today? What did you learn? Record your psychology and performance..."
                         class="glass-input" rows="8" required></textarea>
                 </div>
                 <div class="modal-actions">

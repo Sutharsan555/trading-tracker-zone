@@ -606,11 +606,11 @@ td {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(5px);
-    z-index: 1000;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 3000;
     align-items: center;
     justify-content: center;
 }
@@ -620,9 +620,26 @@ td {
 }
 
 .modal-content {
-    width: 100%;
-    max-width: 500px;
+    width: 95%;
+    max-width: 650px;
     padding: 2.5rem;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header h2 {
+    font-size: 1.75rem;
+    color: var(--primary);
+    margin-bottom: 0.25rem;
+}
+
+.muted-text {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.mb-4 {
+    margin-bottom: 1.5rem;
 }
 
 .form-group {
@@ -658,8 +675,8 @@ td {
 
 .form-row {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
 }
 
 .modal-actions {
